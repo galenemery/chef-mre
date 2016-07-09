@@ -8,3 +8,4 @@ version '0.1.0'
 
 depends 'chef-ingredient', '>= 0.18.5'
 depends 'hostsfile'
+depends 'line'
