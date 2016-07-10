@@ -12,21 +12,24 @@
 
 ##TODO: Grab and extract zip archive with chef-server packages
 
+include_recipe 'chef-mre::_deps'
 
 append_if_no_line "Add loopback => hostname" do
   path "/etc/hosts"
-  line "127.0.0.1 #{node['demo']['domain_prefix']}chef-server.#{node['demo']['domain']} chef-server"
+  line "127.0.0.1 #{node['chef-mre']['domain_prefix']}chef-server.#{node['chef-mre']['domain']} chef-server"
 end
 
 execute 'set hostname' do
-  command "hostnamectl set-hostname #{node[chef-mre][chef-server][hostname]}"
+  command "hostnamectl set-hostname #{node['chef-mre']['chef-server']['hostname']}"
   action :run
+  user 'root'
 end
 
-append_if_no_line "Add certificate to authorized_keys" do
-  path "/home/#{node['demo']['admin-user']}/.ssh/authorized_keys"
-  line lazy { IO.read('/tmp/public.pub') }
-end
+# What the fuck is going here?
+# append_if_no_line "Add certificate to authorized_keys" do
+#   path "/home/#{node['chef-mre']['admin-user']}/.ssh/authorized_keys"
+#   line lazy { IO.read('/tmp/public.pub') }
+# end
 
 directory '/var/opt/opscode'
 directory '/var/opt/opscode/nginx'
@@ -35,18 +38,17 @@ directory '/etc/opscode' do
   mode '0644'
 end
 
-%w(crt key).each do |ext|
-  file "/var/opt/opscode/nginx/ca/#{node['demo']['domain_prefix']}chef-server.#{node['demo']['domain']}.#{ext}" do
-    content lazy { IO.read("/tmp/chef-server.#{ext}") }
-    action :create
-  end
-end
+# %w(crt key).each do |ext|
+#   file "/var/opt/opscode/nginx/ca/#{node['chef-mre']['domain_prefix']}chef-server.#{node['chef-mre']['domain']}.#{ext}" do
+#     content lazy { IO.read("/tmp/chef-server.#{ext}") }
+#     action :create
+#   end
+# end
 
 
 #TODO: Modify all chef_ingredient blocks to utilize local packages
 chef_ingredient 'chef-server' do
-  channel node['demo']['versions']['chef-server'].split('-')[0].to_sym
-  version node['demo']['versions']['chef-server'].split('-')[1]
+  package_source "ftp://172.31.10.169/chef-server-core.rpm"
 end
 
 chef_ingredient 'chef-server' do
@@ -54,9 +56,7 @@ chef_ingredient 'chef-server' do
 end
 
 chef_ingredient 'push-jobs-server' do
-  channel :stable
-  version :latest
-  action  :install
+  package_source "ftp://172.31.10.169/opscode-push-jobs-server.rpm"
 end
 
 chef_ingredient 'push-jobs-server' do
@@ -64,9 +64,7 @@ chef_ingredient 'push-jobs-server' do
 end
 
 chef_ingredient 'manage' do
-  channel :stable
-  version :latest
-  action  :install
+  package_source "ftp://172.31.10.169/chef-manage.rpm"
 end
 
 chef_ingredient 'chef-server' do
@@ -84,5 +82,5 @@ end
 
 delete_lines "Remove loopback entry we added earlier" do
   path "/etc/hosts"
-  pattern "^127\.0\.0\.1.*localhost.*#{node['demo']['domain_prefix']}chef-server\.#{node['demo']['domain']}.*chef-server"
+  pattern "^127\.0\.0\.1.*localhost.*#{node['chef-mre']['domain_prefix']}chef-server\.#{node['chef-mre']['domain']}.*chef-server"
 end

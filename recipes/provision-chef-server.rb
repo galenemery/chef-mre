@@ -13,7 +13,7 @@ with_machine_options({
     },
     transport_options: {
     ip_address: node['chef-mre']['chef-server']['ip'],
-    username: node['chef-mre']['chef-server']['username'],
+    username: node['chef-mre']['admin-user'],
       ssh_options: {
           :keys => node['chef-mre']['ssh-key']
       }
@@ -22,17 +22,5 @@ with_machine_options({
 
 
 machine node['chef-mre']['chef-server']['hostname'] do
-  action :converge
-  # machine_options
-  #   :convergence_options {
-  #     'install_sh_url' => "/tmp/chef-offline.sh",
-  #   },
-  #   :transport_options => {
-  #   'ip_address' => node['chef-mre']['chef-server']['ip'],
-  #   'username' => node['chef-mre']['chef-server']['username'],
-  #   'ssh_options' => {
-  #       'keys' => node['chef-mre']['ssh-key']
-  #   }
-  # }
     recipe 'chef-mre::chef-server'
 end
