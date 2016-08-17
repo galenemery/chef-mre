@@ -9,9 +9,6 @@
 #
 # Copyright (c) 2016 The Authors, All Rights Reserved.
 
-
-##TODO: Grab and extract zip archive with chef-server packages
-
 include_recipe 'chef-mre::_deps'
 
 append_if_no_line "Add loopback => hostname" do
@@ -25,12 +22,6 @@ execute 'set hostname' do
   user 'root'
 end
 
-# What the fuck is going here?
-# append_if_no_line "Add certificate to authorized_keys" do
-#   path "/home/#{node['chef-mre']['admin-user']}/.ssh/authorized_keys"
-#   line lazy { IO.read('/tmp/public.pub') }
-# end
-
 directory '/var/opt/opscode'
 directory '/var/opt/opscode/nginx'
 directory '/var/opt/opscode/nginx/ca'
@@ -38,15 +29,6 @@ directory '/etc/opscode' do
   mode '0644'
 end
 
-# %w(crt key).each do |ext|
-#   file "/var/opt/opscode/nginx/ca/#{node['chef-mre']['domain_prefix']}chef-server.#{node['chef-mre']['domain']}.#{ext}" do
-#     content lazy { IO.read("/tmp/chef-server.#{ext}") }
-#     action :create
-#   end
-# end
-
-
-#TODO: Modify all chef_ingredient blocks to utilize local packages
 chef_ingredient 'chef-server' do
   package_source "ftp://172.31.10.169/chef-server-core.rpm"
 end
@@ -76,11 +58,8 @@ chef_ingredient 'manage' do
   action :reconfigure
 end
 
-##TODO: Use own hosts file recipe instead
-#include_recipe 'wombat::etc-hosts'
-
-
 delete_lines "Remove loopback entry we added earlier" do
   path "/etc/hosts"
   pattern "^127\.0\.0\.1.*localhost.*#{node['chef-mre']['domain_prefix']}chef-server\.#{node['chef-mre']['domain']}.*chef-server"
 end
+
