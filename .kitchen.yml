@@ -1,7 +1,9 @@
 ---
 driver:
   name: vagrant
-
+  customize:
+    natdnshostresolver1: "on"
+    
 provisioner:
   name: chef_zero
 
@@ -15,7 +17,7 @@ platforms:
   - name: centos-7.2
 
 suites:
-  - name: default
+  - name: workstation
     run_list:
-      - recipe[chef-mre::default]
+      - recipe[chef-mre::download-packages]
     attributes:
